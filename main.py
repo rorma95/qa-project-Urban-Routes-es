@@ -40,20 +40,22 @@ def retrieve_phone_code(driver) -> str:
 class UrbanRoutesPage:                                  #localizadores
     from_field = (By.ID, 'from')
     to_field = (By.ID, 'to')
-    ask_a_taxi = (By.CLASS_NAME, "button.round")        # Boton "Pedir un taxi"
-    tariff = (By.CLASS_NAME, "tariff-picker.shown")     # (0)>
-    comfort = (By.XPATH, "//div[text()='Comfort'] ")   # (0)>
-    add_phone_number = (By.CLASS_NAME, "np-text")       # (0)>
-    cellphone_number = (By.ID,"phone")                  # (0)>
-    next_button = (By.CLASS_NAME, "button.full")        # (0)>
-    code = (By.ID,"code")                               # (0)>
-    confirm_code = (By.XPATH, "//button[text()='Confirmar']")        # Xpath por texto(0)>
+    logo = (By.CLASS_NAME, "logo")                      # Correccion para espera
+    results = (By.CLASS_NAME, "results-text")           # Correccion para espera
+    ask_a_taxi = (By.CLASS_NAME, "button.round")
+    tariff = (By.CLASS_NAME, "tariff-picker.shown")
+    comfort = (By.XPATH, "//div[text()='Comfort'] ")
+    add_phone_number = (By.CLASS_NAME, "np-text")
+    cellphone_number = (By.ID,"phone")
+    next_button = (By.CLASS_NAME, "button.full")
+    code = (By.ID,"code")
+    confirm_code = (By.XPATH, "//button[text()='Confirmar']")
     payment_method = (By.CLASS_NAME, "pp-text")
-    add_card = (By.XPATH, "//img[contains(@src,'/static/media/card.411e0152.svg')]") # Xpath por imagen src      # (0)>
+    add_card = (By.XPATH, "//img[contains(@src,'/static/media/card.411e0152.svg')]")
     card_number = (By.ID, "number")
-    card_code = (By.XPATH, "//input[@placeholder='12']")    # Xpath por placeholder      # (0)>
-    add_button = (By.XPATH, "//button[text()='Agregar']")   # Xpath por texto(0)>
-    close_payment = (By.XPATH,"//*[@id='root']/div/div[2]/div[2]/div[1]/button")    #REVISAR ESTE
+    card_code = (By.XPATH, "//input[@placeholder='12']")
+    add_button = (By.XPATH, "//button[text()='Agregar']")
+    close_payment = (By.XPATH, '//div[@class="payment-picker open"]/div/div[@class="section active"]/button[@class="close-button section-close"]')
     driver_message = (By.ID, "comment")
     blanket_n_scarves = (By.XPATH, '//*[@id="root"]/div/div[3]/div[3]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[2]') #click derecho/copy/copy XPATH
     two_icecream = (By.XPATH, '//*[@id="root"]/div/div[3]/div[3]/div[2]/div[2]/div[4]/div[2]/div[3]/div/div[2]/div[1]/div/div[2]/div/div[3]')
@@ -63,8 +65,8 @@ class UrbanRoutesPage:                                  #localizadores
     checkbox = (By.XPATH, '//*[@id="root"]/div/div[3]/div[3]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[2]/div/input')
     number_of_icecream = (By.XPATH, '//*[@id="root"]/div/div[3]/div[3]/div[2]/div[2]/div[4]/div[2]/div[3]/div/div[2]/div[1]/div/div[2]/div/div[2]')
     final_button = (By.CLASS_NAME, "smart-button-main")
-
-
+    driver_rating = (By.CLASS_NAME, "order-btn-rating")   # Correccion para espera
+    cards = (By.CLASS_NAME, "tariff-cards")
 
 # ------------------------------------------------------------------------------------------------------------------------------
 
@@ -93,8 +95,17 @@ class UrbanRoutesPage:                                  #localizadores
     def select_comfort_tariff(self):    # (0)>
         self.driver.find_element(*self.comfort).click()
 
+    def wait_for_results(self):                          # Correccion para espera
+        WebDriverWait(self.driver, 60).until(expected_conditions.visibility_of_element_located(self.results))
+
+    def get_confirmation_taxi(self):
+        return self.driver.find_element(*self.cards).is_displayed()
+
     def get_comfort_tariff_prove(self):
         return self.driver.find_element(*self.blanket_prove).text
+
+    def wait_open_page(self):                           # Correccion para espera
+        WebDriverWait(self.driver, 60).until(expected_conditions.visibility_of_element_located(self.logo))
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -115,14 +126,6 @@ class UrbanRoutesPage:                                  #localizadores
 
     def get_phone_number(self):
         return self.driver.find_element(*self.cellphone_number).get_property('value')
-
-
-    #def set_phone_number(self, test_number, code):
-        #self.click_phone_number()
-        #self.add_number(test_number)
-        #self.click_next_button()
-        #self.add_sms_code(code)
-        #self.click_confirm_code()
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -202,6 +205,9 @@ class UrbanRoutesPage:                                  #localizadores
     def check_final_button(self):
         return self.driver.find_element(*self.final_button).text
 
+    def get_driver_rating(self):
+        return self.driver.find_element(*self.driver_rating).is_displayed()
+
 
 #------------------------------------------------------------------------------------------------------------------------------
 
@@ -227,20 +233,19 @@ class TestUrbanRoutes:
 
     def test_set_route(self):                                                   # ingresamos las direcciones en el campo Desde y Hasta, Comprobamos si son las direcciones que ingresamos
         self.driver.get(data.urban_routes_url)
-        time.sleep(3)
         routes_page = UrbanRoutesPage(self.driver)
+        routes_page.wait_open_page()
         address_from = data.address_from
         address_to = data.address_to
         routes_page.set_route(address_from, address_to)
         assert routes_page.get_from() == address_from
         assert routes_page.get_to() == address_to
-        time.sleep(1)
-
 
     def test_taxi_button(self):                                                 # Hacemos click en el boton de pedir un taxi
         routes_page = UrbanRoutesPage(self.driver)
+        routes_page.wait_for_results()
         routes_page.click_ask_a_taxi()
-        #time.sleep(3)
+        assert routes_page.get_confirmation_taxi() == True
 
     def test_comfort_click(self):                                               # Seleccionamos la tarifa Comfort, comprobamos que se haya seleccionado la tarifa Comfort comprobando uno de los elementos que se pueden agregar
         routes_page = UrbanRoutesPage(self.driver)
@@ -289,8 +294,12 @@ class TestUrbanRoutes:
         routes_page = UrbanRoutesPage(self.driver)
         routes_page.click_final_ask_taxi()
         assert "Pedir un taxi" in routes_page.check_final_button()
+
+    def test_final_page(self):                                                  # Espera a que se asigne un conductor
+        routes_page = UrbanRoutesPage(self.driver)
         routes_page.wait_for()
-        time.sleep(2)
+        assert routes_page.get_driver_rating() == True
+        time.sleep(2)                                                           # Lo deje solo para  ver que se  realizaron  correctamente las   demas pruebas
 
     @classmethod
     def teardown_class(cls):

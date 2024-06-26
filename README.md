@@ -32,6 +32,13 @@
 - README.md. 
 - .gitignore. 
 
+## Como configurar el proyecto
+-   Se debera clonar el repositorio del  proyecto desde github
+-   Usar PyCharm  para  correr el proyecto.
+  - Instalar la configuracion Pytest
+  - Instalar Selenium webdriver
+  - Una vez instalado lso paquetes anteriores, para corer  el codigo de forma correcta,  se  debera de actualizar la variable "urban_routes_url", en   el  archivo daata.py, con la url de un nuevo servidor de la aplicacion Urban Routes, ya que el servidor deja de funcionar despues de un  tiempo
+
 ## Pasos a seguir, usando pycharm:
 - Obtener un servidor para la aplicacion Urban Routes.
 - Crear una ruta.
@@ -56,3 +63,11 @@
 - 	Pedir 2 helados.
 -   Aparece el modal para buscar un taxi.
 - 	Esperar a que aparezca la información del conductor en el modal (opcional). Además de los pasos anteriores, hay un paso opcional que puedes comprobar; este es un poco más complicado que los demás, pero es una buena práctica, ya que es probable que en tu trayectoria profesional encuentres tareas más difíciles.
+
+
+## Correcciones realizadas.
+-   Se Cambiaron algunos time.sleep por funciones del tipo WebDriverWait 
+-   Se me solicita "explorar por lo menos 1 tipo de selector más :) ¿Quizás ClassName o CSS?", sin  embargo, si uso el selector por nombre, tan   es asi que  localizadores como, "ask_a_taxi",  "tariff" y "final_button",  son poir CLASS_NAME, y antes de la revision eran de los primeros localizadores y el ultimo localizador.
+-   En  ese mismo punto se me indica que "Tienes todas tus funciones test_ sin asserts al final" sin  embargo, todas mis pruebas cuentan y  contaban  con  su propio assert, esto me genera  dudas sobrte  si de verdad se reviso mi codigo. 
+-   Se modifico  el  archivo README.md  agregando la seccion "Como configurar el proyecto"
+-   Se me  solicita "En el README.md hay que mencionar el comando completo que se usa para ejecutar el proyecto: pytest folder/de/proyecto/tests.py", pero no se a que  se refiera, solicito mayor informacion
